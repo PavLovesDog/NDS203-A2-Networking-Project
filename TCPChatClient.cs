@@ -28,7 +28,7 @@ namespace NDS_Networking_Project
             //check ports are open and in range
             if (port > 0 && port < 65535 &&
                 serverPort > 0 && serverPort < 65535 &&
-                serverIP.Length < 0 && chatTextBox != null) //TODO serverIP.Length > 0 ?? should be NOT empty??
+                serverIP.Length > 0 && chatTextBox != null)
             {
                 tcp = new TCPChatClient();
                 tcp.port = port;
@@ -84,7 +84,7 @@ namespace NDS_Networking_Project
             }
             catch(SocketException ex)
             {
-                AddToChat("\nError: " + ex.Message);
+                AddToChat("\nError: " + ex.Message + "\n");
                 AddToChat("\n << Disconnecting >>");
                 currentClientSocket.socket.Close();
                 return;

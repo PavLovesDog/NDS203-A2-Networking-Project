@@ -42,7 +42,7 @@ namespace NDS_Networking_Project
 
         public void SetupServer()
         {
-            chatTextBox.Text += "Setting up server... \n"; // notify text box
+            chatTextBox.Text += "...setting up server..." + nl; // notify text box
 
             //bind socket to listen on (listen on what port for incoming messages?)
             serverSocket.Bind(new IPEndPoint(IPAddress.Any, port));
@@ -50,7 +50,7 @@ namespace NDS_Networking_Project
 
             //start thread to read connecting clients, when connection happens, use AcceptCallBack function to deal with it
             serverSocket.BeginAccept(AcceptCallBack, this); // BeginAccept makes a thread, an asyncronus activity (if there are multiple, they work at their OWN pace)
-            chatTextBox.Text += "Server setup complete.\n";
+            chatTextBox.Text += "<< Server Setup Complete >>" + nl;
         }
 
         // to close/diconnect all sockets at end of program
@@ -80,7 +80,7 @@ namespace NDS_Networking_Project
             }
             catch(ObjectDisposedException)
             {
-                chatTextBox.Text += "Client join failed...";
+                chatTextBox.Text += "...Client Join Failed...";
                 return; // bail on error...
             }
 
@@ -99,7 +99,7 @@ namespace NDS_Networking_Project
                                        newClientSocket);          // object associated with this socket
 
             // notify text box
-            AddToChat("Client Connected, ready to receive data...");
+            AddToChat(nl + "<< Client Connected >>" + nl + "...ready to receive data...");
 
             // This wait for new client thread done, so start another thread to get a new client :)
             serverSocket.BeginAccept(AcceptCallBack, null);
@@ -120,8 +120,8 @@ namespace NDS_Networking_Project
             }
             catch(SocketException ex)
             {
-                AddToChat("Error: " + ex.Message);
-                AddToChat("! Error Occured !\n...disconnecting client...");
+                AddToChat("Error: " + ex.Message + nl + nl);
+                AddToChat("! Error Occured !" + nl + "<< Client Disconnected >>");
                 currentClientSocket.socket.Close(); // shut it down
                 clientSockets.Remove(currentClientSocket); // remove from list
                 return; // leave function
@@ -138,9 +138,9 @@ namespace NDS_Networking_Project
             //TODO Check for commands from Users first
             if(text.ToLower() == "!commands")
             {
-                byte[] data = Encoding.ASCII.GetBytes("Commands are; \n\n!commands\n!about\n!who\n!whisper\n!exit");
+                byte[] data = Encoding.ASCII.GetBytes(nl + "COMMANDS ARE;" + nl + "!commands" + nl + "!about" + nl + "!who" + nl + "!whisper" + nl + "!exit");
                 currentClientSocket.socket.Send(data); // send straight back to person who sent in data
-                AddToChat("<< Commands sent to client >> " + currentClientSocket.socket.SocketType);//TODO CHANGE THIS
+                AddToChat("\n...commands sent to client...");//TODO CHANGE THIS
             }
             else if (text.ToLower() == "!about")
             {

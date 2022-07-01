@@ -7,6 +7,9 @@ namespace NDS_Networking_Project
 {
     public class TCPChatBase
     {
+        // create quick access for new line in textbox, as "\n" doesn't seem to be working...
+        public Object nl = Environment.NewLine;
+
         public TextBox chatTextBox; // to access main chat text box in app
         public int port; //when listenning for data, need port open
 

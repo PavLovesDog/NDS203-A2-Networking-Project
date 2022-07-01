@@ -63,7 +63,7 @@ namespace NDS_Networking_Project
             this.HostPortTextBox.Name = "HostPortTextBox";
             this.HostPortTextBox.Size = new System.Drawing.Size(139, 27);
             this.HostPortTextBox.TabIndex = 1;
-            this.HostPortTextBox.Text = "666 666";
+            this.HostPortTextBox.Text = "6666";
             this.HostPortTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // HostServerButton
@@ -106,7 +106,7 @@ namespace NDS_Networking_Project
             this.ServerPortTextBox.Name = "ServerPortTextBox";
             this.ServerPortTextBox.Size = new System.Drawing.Size(133, 27);
             this.ServerPortTextBox.TabIndex = 5;
-            this.ServerPortTextBox.Text = "555 555";
+            this.ServerPortTextBox.Text = "6666";
             this.ServerPortTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // ServerIPLabel
@@ -154,22 +154,23 @@ namespace NDS_Networking_Project
             // ChatLabel
             // 
             this.ChatLabel.AutoSize = true;
-            this.ChatLabel.BackColor = System.Drawing.Color.Transparent;
+            this.ChatLabel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
+            this.ChatLabel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.ChatLabel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ChatLabel.Font = new System.Drawing.Font("Gill Sans Nova Light", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ChatLabel.ForeColor = System.Drawing.SystemColors.Control;
-            this.ChatLabel.Location = new System.Drawing.Point(22, 398);
+            this.ChatLabel.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.ChatLabel.Location = new System.Drawing.Point(31, 399);
             this.ChatLabel.Name = "ChatLabel";
-            this.ChatLabel.Size = new System.Drawing.Size(49, 26);
+            this.ChatLabel.Size = new System.Drawing.Size(60, 28);
             this.ChatLabel.TabIndex = 10;
-            this.ChatLabel.Text = "Chat";
+            this.ChatLabel.Text = "Chat: ";
             // 
             // TypeTextBox
             // 
             this.TypeTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.TypeTextBox.Location = new System.Drawing.Point(77, 399);
+            this.TypeTextBox.Location = new System.Drawing.Point(80, 399);
             this.TypeTextBox.Name = "TypeTextBox";
-            this.TypeTextBox.Size = new System.Drawing.Size(523, 27);
+            this.TypeTextBox.Size = new System.Drawing.Size(520, 27);
             this.TypeTextBox.TabIndex = 11;
             // 
             // SendButton
