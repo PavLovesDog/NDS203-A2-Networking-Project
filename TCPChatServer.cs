@@ -15,6 +15,7 @@ namespace NDS_Networking_Project
 
     public class TCPChatServer : TCPChatBase
     {
+        
         // Socket to represent the server itself
         public Socket serverSocket = new Socket(AddressFamily.InterNetwork, 
                                                 SocketType.Stream, 
@@ -23,7 +24,7 @@ namespace NDS_Networking_Project
         public List<ClientSocket> clientSockets = new List<ClientSocket>();
 
         //Helper creator function
-        public static TCPChatServer CreateInstance(int port, TextBox chatTextBox)
+        public static TCPChatServer CreateInstance(int port, TextBox chatTextBox, PictureBox logo)
         {
             TCPChatServer tcp = null; // set to null, if it returns null, user did something wrong
 
@@ -34,6 +35,7 @@ namespace NDS_Networking_Project
                 tcp = new TCPChatServer();
                 tcp.port = port;
                 tcp.chatTextBox = chatTextBox;
+                tcp.logoPicBox = logo;
             }
 
             //retunr as null OR built server
@@ -110,6 +112,8 @@ namespace NDS_Networking_Project
         {
             // get ClientSocket object from 'IAsyncResult AR' so we can deal with individual client data
             ClientSocket currentClientSocket = (ClientSocket)AR.AsyncState; // cast 'AR.AsyncState' as '(ClientSocket)' to access
+            
+            //TCPChatClient currentClient = (TCPChatClient)currentClientSocket;//TODO will this work? NOPE
 
             // how many bytes of data received
             int received;
@@ -154,9 +158,18 @@ namespace NDS_Networking_Project
             {
                 //TODO fill me IN...
             }
+            else if (text.ToLower() == "!username")
+            {
+                //TODO fill me IN...
+                AddToChat(currentClientSocket.clientUserName);
+            }
             else if (text.ToLower() == "!exit") // client wants to exit gracefully...
             {
                 //TODO FILL ME IN....
+                //TODO somehow get a reference to the logo pic box!
+                IndentIcon();
+                //currentClient.logoPicBox.BorderStyle = BorderStyle.FixedSingle;
+
                 currentClientSocket.socket.Shutdown(SocketShutdown.Both); // shutdown server-side for client
                 currentClientSocket.socket.Close();
                 clientSockets.Remove(currentClientSocket);

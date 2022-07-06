@@ -21,7 +21,7 @@ namespace NDS_Networking_Project
         public string serverIP; // IP address
 
         // helper creator static function
-        public static TCPChatClient CreateInstance(int port, int serverPort, string serverIP, TextBox chatTextBox)
+        public static TCPChatClient CreateInstance(int port, int serverPort, string serverIP, TextBox chatTextBox, PictureBox logoPic, string userName)
         {
             TCPChatClient tcp = null;
 
@@ -36,6 +36,8 @@ namespace NDS_Networking_Project
                 tcp.serverIP = serverIP;
                 tcp.chatTextBox = chatTextBox;
                 tcp.clientSocket.socket = tcp.socket;
+                tcp.logoPicBox = logoPic;
+                tcp.clientSocket.clientUserName = userName;
             }
             return tcp;
         }
@@ -59,6 +61,7 @@ namespace NDS_Networking_Project
                     chatTextBox.Text += "\nError: " + ex.Message + "\n";
                 }
             }
+
             AddToChat("<< Connected >>");
 
             //start thread for receeiving data from the server

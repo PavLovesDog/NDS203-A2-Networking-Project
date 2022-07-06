@@ -10,8 +10,25 @@ namespace NDS_Networking_Project
         // create quick access for new line in textbox, as "\n" doesn't seem to be working...
         public Object nl = Environment.NewLine;
 
+        public PictureBox logoPicBox;
         public TextBox chatTextBox; // to access main chat text box in app
         public int port; //when listenning for data, need port open
+
+        public void IndentIcon()
+        {
+            //logoPicBox = NDS_Networking_Project.TCPChatClient.
+            logoPicBox.Invoke((Action)delegate // access the HOST logo.. how do I access cureent logo??
+            {
+                if (logoPicBox.BorderStyle == BorderStyle.FixedSingle)
+                {
+                    logoPicBox.BorderStyle = BorderStyle.Fixed3D;
+                }
+                else if (logoPicBox.BorderStyle == BorderStyle.Fixed3D)
+                {
+                    logoPicBox.BorderStyle = BorderStyle.FixedSingle;
+                }
+            });
+        }
 
         // Functions to help work with the chat text box
         public void SetChat(string str)

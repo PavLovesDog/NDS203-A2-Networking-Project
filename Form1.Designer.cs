@@ -42,6 +42,8 @@ namespace NDS_Networking_Project
             this.ChatLabel = new System.Windows.Forms.Label();
             this.TypeTextBox = new System.Windows.Forms.TextBox();
             this.SendButton = new System.Windows.Forms.Button();
+            this.LogoPicBox = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.LogoPicBox)).BeginInit();
             this.SuspendLayout();
             // 
             // HostPortLabel
@@ -68,7 +70,7 @@ namespace NDS_Networking_Project
             // 
             // HostServerButton
             // 
-            this.HostServerButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            this.HostServerButton.BackColor = System.Drawing.Color.LightSkyBlue;
             this.HostServerButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.HostServerButton.Font = new System.Drawing.Font("Comic Sans MS", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.HostServerButton.Location = new System.Drawing.Point(48, 65);
@@ -131,7 +133,7 @@ namespace NDS_Networking_Project
             // 
             // JoinServerButton
             // 
-            this.JoinServerButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            this.JoinServerButton.BackColor = System.Drawing.Color.DarkSalmon;
             this.JoinServerButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.JoinServerButton.Font = new System.Drawing.Font("Comic Sans MS", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.JoinServerButton.Location = new System.Drawing.Point(248, 65);
@@ -154,12 +156,12 @@ namespace NDS_Networking_Project
             // ChatLabel
             // 
             this.ChatLabel.AutoSize = true;
-            this.ChatLabel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
+            this.ChatLabel.BackColor = System.Drawing.Color.LightGreen;
             this.ChatLabel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.ChatLabel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ChatLabel.Font = new System.Drawing.Font("Gill Sans Nova Light", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ChatLabel.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.ChatLabel.Location = new System.Drawing.Point(31, 399);
+            this.ChatLabel.Location = new System.Drawing.Point(31, 398);
             this.ChatLabel.Name = "ChatLabel";
             this.ChatLabel.Size = new System.Drawing.Size(60, 28);
             this.ChatLabel.TabIndex = 10;
@@ -168,14 +170,14 @@ namespace NDS_Networking_Project
             // TypeTextBox
             // 
             this.TypeTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.TypeTextBox.Location = new System.Drawing.Point(80, 399);
+            this.TypeTextBox.Location = new System.Drawing.Point(97, 398);
             this.TypeTextBox.Name = "TypeTextBox";
-            this.TypeTextBox.Size = new System.Drawing.Size(520, 27);
+            this.TypeTextBox.Size = new System.Drawing.Size(488, 27);
             this.TypeTextBox.TabIndex = 11;
             // 
             // SendButton
             // 
-            this.SendButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
+            this.SendButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
             this.SendButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.SendButton.Location = new System.Drawing.Point(609, 397);
             this.SendButton.Name = "SendButton";
@@ -185,13 +187,26 @@ namespace NDS_Networking_Project
             this.SendButton.UseVisualStyleBackColor = false;
             this.SendButton.Click += new System.EventHandler(this.SendButton_Click);
             // 
+            // LogoPicBox
+            // 
+            this.LogoPicBox.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.LogoPicBox.BackgroundImage = global::NDS_Networking_Project.Properties.Resources.avatarLogo;
+            this.LogoPicBox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.LogoPicBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.LogoPicBox.Location = new System.Drawing.Point(718, 134);
+            this.LogoPicBox.Name = "LogoPicBox";
+            this.LogoPicBox.Size = new System.Drawing.Size(89, 74);
+            this.LogoPicBox.TabIndex = 13;
+            this.LogoPicBox.TabStop = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackgroundImage = global::NDS_Networking_Project.Properties.Resources.landscape;
-            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.BackgroundImage = global::NDS_Networking_Project.Properties.Resources.MSNbackground;
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(1208, 455);
+            this.Controls.Add(this.LogoPicBox);
             this.Controls.Add(this.SendButton);
             this.Controls.Add(this.TypeTextBox);
             this.Controls.Add(this.ChatLabel);
@@ -207,6 +222,7 @@ namespace NDS_Networking_Project
             this.Controls.Add(this.HostPortLabel);
             this.Name = "Form1";
             this.Text = "Chat Application";
+            ((System.ComponentModel.ISupportInitialize)(this.LogoPicBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -227,6 +243,7 @@ namespace NDS_Networking_Project
         private System.Windows.Forms.Label ChatLabel;
         private System.Windows.Forms.TextBox TypeTextBox;
         private System.Windows.Forms.Button SendButton;
+        private System.Windows.Forms.PictureBox LogoPicBox;
     }
 }
 

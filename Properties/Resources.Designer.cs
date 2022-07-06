@@ -63,9 +63,29 @@ namespace NDS_Networking_Project.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap avatarLogo {
+            get {
+                object obj = ResourceManager.GetObject("avatarLogo", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap landscape {
             get {
                 object obj = ResourceManager.GetObject("landscape", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap MSNbackground {
+            get {
+                object obj = ResourceManager.GetObject("MSNbackground", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
