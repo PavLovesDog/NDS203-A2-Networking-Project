@@ -11,6 +11,7 @@ namespace NDS_Networking_Project
         public Object nl = Environment.NewLine;
 
         public PictureBox logoPicBox;
+        public TextBox clientUsernameTextBox;
         public TextBox chatTextBox; // to access main chat text box in app
         public int port; //when listenning for data, need port open
 

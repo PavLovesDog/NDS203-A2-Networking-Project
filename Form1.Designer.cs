@@ -43,6 +43,8 @@ namespace NDS_Networking_Project
             this.TypeTextBox = new System.Windows.Forms.TextBox();
             this.SendButton = new System.Windows.Forms.Button();
             this.LogoPicBox = new System.Windows.Forms.PictureBox();
+            this.ClientUsernameTextBox = new System.Windows.Forms.TextBox();
+            this.ClientUsernameLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.LogoPicBox)).BeginInit();
             this.SuspendLayout();
             // 
@@ -199,6 +201,24 @@ namespace NDS_Networking_Project
             this.LogoPicBox.TabIndex = 13;
             this.LogoPicBox.TabStop = false;
             // 
+            // ClientUsernameTextBox
+            // 
+            this.ClientUsernameTextBox.Location = new System.Drawing.Point(439, 85);
+            this.ClientUsernameTextBox.Name = "ClientUsernameTextBox";
+            this.ClientUsernameTextBox.Size = new System.Drawing.Size(154, 27);
+            this.ClientUsernameTextBox.TabIndex = 14;
+            // 
+            // ClientUsernameLabel
+            // 
+            this.ClientUsernameLabel.AutoSize = true;
+            this.ClientUsernameLabel.BackColor = System.Drawing.Color.Transparent;
+            this.ClientUsernameLabel.Font = new System.Drawing.Font("Gill Sans Nova Light", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.ClientUsernameLabel.Location = new System.Drawing.Point(439, 60);
+            this.ClientUsernameLabel.Name = "ClientUsernameLabel";
+            this.ClientUsernameLabel.Size = new System.Drawing.Size(121, 22);
+            this.ClientUsernameLabel.TabIndex = 15;
+            this.ClientUsernameLabel.Text = "Client Username";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -206,6 +226,8 @@ namespace NDS_Networking_Project
             this.BackgroundImage = global::NDS_Networking_Project.Properties.Resources.MSNbackground;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(1208, 455);
+            this.Controls.Add(this.ClientUsernameLabel);
+            this.Controls.Add(this.ClientUsernameTextBox);
             this.Controls.Add(this.LogoPicBox);
             this.Controls.Add(this.SendButton);
             this.Controls.Add(this.TypeTextBox);
@@ -244,6 +266,8 @@ namespace NDS_Networking_Project
         private System.Windows.Forms.TextBox TypeTextBox;
         private System.Windows.Forms.Button SendButton;
         private System.Windows.Forms.PictureBox LogoPicBox;
+        private System.Windows.Forms.TextBox ClientUsernameTextBox;
+        private System.Windows.Forms.Label ClientUsernameLabel;
     }
 }
 

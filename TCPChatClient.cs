@@ -21,7 +21,7 @@ namespace NDS_Networking_Project
         public string serverIP; // IP address
 
         // helper creator static function
-        public static TCPChatClient CreateInstance(int port, int serverPort, string serverIP, TextBox chatTextBox, PictureBox logoPic, string userName)
+        public static TCPChatClient CreateInstance(int port, int serverPort, string serverIP, TextBox chatTextBox, PictureBox logoPic, TextBox clientUsername)
         {
             TCPChatClient tcp = null;
 
@@ -37,7 +37,8 @@ namespace NDS_Networking_Project
                 tcp.chatTextBox = chatTextBox;
                 tcp.clientSocket.socket = tcp.socket;
                 tcp.logoPicBox = logoPic;
-                tcp.clientSocket.clientUserName = userName;
+                tcp.clientUsernameTextBox = clientUsername;
+                
             }
             return tcp;
         }
@@ -62,7 +63,10 @@ namespace NDS_Networking_Project
                 }
             }
 
-            AddToChat("<< Connected >>");
+            //AddToChat("<< Connected >>");
+            AddToChat(nl + "<< Connected >>" + nl + "...ready to receive data..." +
+                      nl + nl + "...Please enter your username using the '!username' command..." +
+                      nl + "( e.g !username [new_username_here] )");
 
             //start thread for receeiving data from the server
             clientSocket.socket.BeginReceive(clientSocket.buffer, 
@@ -98,6 +102,49 @@ namespace NDS_Networking_Project
             Array.Copy(currentClientSocket.buffer, recBuf, received); // copy info into array
             //convert received byte data into string
             string text = Encoding.ASCII.GetString(recBuf);
+
+            // Store username data for display
+            string tempUserName = "";
+            if (text.Contains("!displayusername "))
+            {
+                // create string to hold the username data
+                tempUserName = text.Remove(0, 17);
+                text = text.Remove(16, text.Length - 16);
+            }
+
+            // Reaction Commands --------------------------------------------------------
+            if(text.ToLower() == "!exit")
+            {
+                logoPicBox.Invoke((Action)delegate // access the HOST logo.. how do I access cureent logo??
+                {
+                    if (logoPicBox.BorderStyle == BorderStyle.FixedSingle)
+                    {
+                        logoPicBox.BorderStyle = BorderStyle.Fixed3D;
+                    }
+                    else if (logoPicBox.BorderStyle == BorderStyle.Fixed3D)
+                    {
+                        logoPicBox.BorderStyle = BorderStyle.FixedSingle;
+                    }
+                });
+            }
+            else if(text.ToLower() == "!kick") // time to disconnect
+            {
+                currentClientSocket.socket.Shutdown(SocketShutdown.Both); // shutdown server-side for client
+                currentClientSocket.socket.Close();
+                AddToChat("<< Client Disconnected >>");
+            }
+
+            if (text.ToLower() == "!displayusername")
+            {
+                clientUsernameTextBox.Invoke((Action)delegate
+                {
+                    clientUsernameTextBox.Text = tempUserName;
+                });
+            }
+
+            
+
+
 
             //any data at this point from server is likely chat message, so put in text box.
             //TODO NOTE Assignment 2 will also send OTHER types of data, so don't auto dump to chat right away

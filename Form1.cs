@@ -14,7 +14,17 @@ namespace NDS_Networking_Project
     {
         TCPChatServer server = null;
         TCPChatClient client = null;
-        string userName = null;
+        public string clientUserName = null;
+        public int clientID = 1;
+
+        //public struct connectectedClient
+        //{
+        //    public string port;
+        //    public int clientID;
+        //    public string username;
+        //}
+        //public List<connectectedClient> connectectedClients = new List<connectectedClient>();
+
 
 
         public Form1()
@@ -44,6 +54,10 @@ namespace NDS_Networking_Project
 
                     server.SetupServer();
 
+                    // Indent Icon for connectivity
+                    LogoPicBox.BorderStyle = BorderStyle.Fixed3D;
+                    ClientUsernameTextBox.Text = "HOST";
+
                 }
                 catch(Exception ex) // if chars other than numbers passed in...
                 {
@@ -56,15 +70,6 @@ namespace NDS_Networking_Project
         {
             if (CanHostOrJoin())
             {
-                //TODO Input usernamer?
-                ////ChatTextBox.Text = "\n--- Please Input Username  & click Send ---\n";
-                ////SendButton_Click(sender, e);
-                //////TODO HOW TO WAIT FOR USER INPUT?
-                ////while(userName == null)
-                ////{
-                ////    if (userName != null) break;
-                ////}
-
                 try
                 {
                     // check if ports are correct format..
@@ -78,7 +83,8 @@ namespace NDS_Networking_Project
                                                           ServerIPTextBox.Text, 
                                                           ChatTextBox,
                                                           LogoPicBox,
-                                                          userName); // reference for logo pic ONLY EVER REFERENCES FIRST WINDOW??
+                                                          ClientUsernameTextBox); // reference for logo pic ONLY EVER REFERENCES FIRST WINDOW??
+
                     if(client == null)
                     {
                         //assume port issue
@@ -89,11 +95,24 @@ namespace NDS_Networking_Project
 
                     // Indent Icon for connectivity
                     LogoPicBox.BorderStyle = BorderStyle.Fixed3D;
+
+                    ////add data to list to be referenced and Identify users by port number from server
+                    //connectectedClient newClient = new connectectedClient();
+                    //newClient.port = port.ToString();
+                    //newClient.clientID = clientID;
+                    //newClient.username = clientUserName;
+                    //
+                    //connectectedClients.Add(newClient); // store all data Window/Client side
+
+                    clientID += 1; // increment for next user to  join
                 }
                 catch(Exception ex)
                 {
                     ChatTextBox.Text += "\nError: " + ex + "\n";
                 }
+
+                
+
             }
         }
 

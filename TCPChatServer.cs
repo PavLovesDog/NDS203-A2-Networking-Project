@@ -15,7 +15,8 @@ namespace NDS_Networking_Project
 
     public class TCPChatServer : TCPChatBase
     {
-        
+        public static Form1 window = new Form1();
+
         // Socket to represent the server itself
         public Socket serverSocket = new Socket(AddressFamily.InterNetwork, 
                                                 SocketType.Stream, 
@@ -86,7 +87,7 @@ namespace NDS_Networking_Project
                 return; // bail on error...
             }
 
-            // build wrapper arond client wjo just joined
+            // build wrapper arond client who just joined
             ClientSocket newClientSocket = new ClientSocket();
             newClientSocket.socket = joiningSocket;
 
@@ -101,7 +102,7 @@ namespace NDS_Networking_Project
                                        newClientSocket);          // object associated with this socket
 
             // notify text box
-            AddToChat(nl + "<< Client Connected >>" + nl + "...ready to receive data...");
+            AddToChat(nl + "<< Client Connected >>"); 
 
             // This wait for new client thread done, so start another thread to get a new client :)
             serverSocket.BeginAccept(AcceptCallBack, null);
@@ -139,6 +140,17 @@ namespace NDS_Networking_Project
 
             AddToChat(text);
 
+            string tempUserName = "";
+            if (text.Contains("!username "))
+            {
+                // create string to hold the username data
+                tempUserName = text.Remove(0, 10);
+
+                //append text so it triggers command
+                
+                text = text.Remove(9, text.Length - 9);
+            }
+
             //TODO Check for commands from Users first
             if(text.ToLower() == "!commands")
             {
@@ -158,28 +170,89 @@ namespace NDS_Networking_Project
             {
                 //TODO fill me IN...
             }
-            else if (text.ToLower() == "!username")
+            else if (text.ToLower() == "!username") // concatonate or whatever the first half.
             {
-                //TODO fill me IN...
-                AddToChat(currentClientSocket.clientUserName);
+                /*
+                    string IP = currentClientSocket.socket.LocalEndPoint.ToString(); // LOCAL is the server host
+                    string port = currentClientSocket.socket.RemoteEndPoint.ToString(); // REMOTE is the connected user
+
+                    //Append string to remove IPaddress "127.0.0.1:" from front to leave only port
+                    //port.Replace("127.0.0.1:", "");
+                    string appendedPort = port.Remove(0, 10); // remove IPAddress
+                    //port.Remove(0, 10); // remove IPAddress
+                */
+
+                byte[] data = Encoding.ASCII.GetBytes(" "); // create empty byte array
+                bool getKicked = false;
+
+                //set username------
+                // run through connected users
+                for (int i = 0; i < clientSockets.Count; ++i)
+                {
+                    // if the name is taken
+                    if(clientSockets[i].clientUserName == tempUserName)
+                    {
+                        //TODO  - tell them it's been taken
+                        data = Encoding.ASCII.GetBytes(nl + "!!! Username: " + tempUserName + " is already taken !!!" + 
+                                                       nl + "<< Disconnecting User >>");
+                        currentClientSocket.socket.Send(data); // send it back
+
+                        //TODO  - boot them
+                        getKicked = true;
+                        break;
+
+                    }
+                    else if (clientSockets[i].clientUserName == null)
+                    { 
+                        currentClientSocket.clientUserName = tempUserName;
+
+                        // Send data to update display box for client Usernames
+                        data = Encoding.ASCII.GetBytes("!displayusername " + tempUserName);
+                        currentClientSocket.socket.Send(data);
+
+                        // change data to represent success
+                        data = Encoding.ASCII.GetBytes(nl + "<< Success >>" +
+                                                       nl + "Your New Username: " + tempUserName + nl + 
+                                                       nl + "Welcome to chat " + "'" + tempUserName + "'");
+                    }
+                }
+
+                // Notify
+                if(getKicked)
+                {
+                    data = Encoding.ASCII.GetBytes("!kick"); // command for client to get disconnect 
+                    currentClientSocket.socket.Send(data); // send it back
+                    clientSockets.Remove(currentClientSocket);
+                    getKicked = false; // reset bool
+                    return; // bail early
+                }
+                else
+                {
+                    currentClientSocket.socket.Send(data); // send it back
+                }
+
             }
             else if (text.ToLower() == "!exit") // client wants to exit gracefully...
             {
-                //TODO FILL ME IN....
-                //TODO somehow get a reference to the logo pic box!
-                IndentIcon();
-                //currentClient.logoPicBox.BorderStyle = BorderStyle.FixedSingle;
+                byte[] data = Encoding.ASCII.GetBytes("!exit");
+                currentClientSocket.socket.Send(data); // send back data to change IDENT
 
                 currentClientSocket.socket.Shutdown(SocketShutdown.Both); // shutdown server-side for client
                 currentClientSocket.socket.Close();
                 clientSockets.Remove(currentClientSocket);
                 AddToChat("<< Client Disconnected >>");
+
+                if (text.ToLower() == "!exit" && clientSockets.Count <= 0) // all clients disconnected
+                {
+                    IndentIcon(); // change server Icon Identation
+                }
+
                 return; // bail early, rest of function not useful for !exit
             }
             else // no cammond, REGULAR CHAT MESSAGE
             {
                 // must be normal chat message form client, so send to all other clients
-                SendToAll(text, currentClientSocket); // does not send to self though...
+                SendToAll(currentClientSocket.clientUserName + ": " + text, currentClientSocket); // does not send to self though...
             }
 
             // now data has been received from this client, the thread is finished...
