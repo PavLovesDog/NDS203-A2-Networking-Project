@@ -159,18 +159,33 @@ namespace NDS_Networking_Project
             //TODO Check for commands from Users first
             if (text.ToLower() == "!commands")
             {
-                byte[] data = Encoding.ASCII.GetBytes(nl + "COMMANDS ARE;" +
-                                                      nl + "!commands" + //TODO add descriptions heree.....
-                                                      nl + "!about" +
-                                                      nl + "!who" +
-                                                      nl + "!whisper" +
-                                                      nl + "!exit");
+                byte[] data = Encoding.ASCII.GetBytes(nl + "<< COMMANDS >>" +
+                                                      nl + "!commands - see a list of commands" +
+                                                      nl + "!username [new_username] - set yourself a new username" +
+                                                      nl + "!user - change your current username" +
+                                                      nl + "!about - see details of the program" +
+                                                      nl + "!who - see who is in the chat" +
+                                                      nl + "!whisper [username] - send a private message to user" +
+                                                      nl + "!joke - get the server to tell you a random joke" +
+                                                      nl + "!exit - disconnect from the server");
                 currentClientSocket.socket.Send(data); // send straight back to person who sent in data
-                AddToChat("\n...commands sent to client...");//TODO CHANGE THIS
+                AddToChat("\n...commands sent to client...");//TODO CHANGE THIS ?
             }
             else if (text.ToLower() == "!about")
             {
-                //TODO FILL me in...
+                string IP = serverSocket.LocalEndPoint.ToString(); // LOCAL is the server host
+
+                //Append strings
+                string appendedPort = IP.Replace("0.0.0.0:", "");
+                string appendedIP = IP.Replace(":6666", "");
+
+                byte[] data = Encoding.ASCII.GetBytes(nl + "Created by Matthew Carr & Charles Bird" +
+                                                      nl + "to ensure people have a ways to communicate in style." +
+                                                      nl + nl + "IP address: " + appendedIP +
+                                                      nl + "Port number: " + appendedPort +
+                                                      nl + nl + "Netwoes INC. Copyright (c) All Rights Reserved, TM (2022)");
+                currentClientSocket.socket.Send(data);
+
             }
             else if (text.ToLower() == "!who")
             {

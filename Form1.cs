@@ -96,14 +96,6 @@ namespace NDS_Networking_Project
                     // Indent Icon for connectivity
                     LogoPicBox.BorderStyle = BorderStyle.Fixed3D;
 
-                    ////add data to list to be referenced and Identify users by port number from server
-                    //connectectedClient newClient = new connectectedClient();
-                    //newClient.port = port.ToString();
-                    //newClient.clientID = clientID;
-                    //newClient.username = clientUserName;
-                    //
-                    //connectectedClients.Add(newClient); // store all data Window/Client side
-
                     clientID += 1; // increment for next user to  join
                 }
                 catch(Exception ex)
