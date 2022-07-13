@@ -115,6 +115,7 @@ namespace NDS_Networking_Project
             // Reaction Commands --------------------------------------------------------
             if(text.ToLower() == "!exit")
             {
+                // Reset icon Identation
                 logoPicBox.Invoke((Action)delegate // access the HOST logo.. how do I access cureent logo??
                 {
                     if (logoPicBox.BorderStyle == BorderStyle.FixedSingle)
@@ -125,6 +126,12 @@ namespace NDS_Networking_Project
                     {
                         logoPicBox.BorderStyle = BorderStyle.FixedSingle;
                     }
+                });
+
+                //Empty Username box
+                clientUsernameTextBox.Invoke((Action)delegate
+                {
+                    clientUsernameTextBox.Text = "";
                 });
             }
             else if(text.ToLower() == "!kick") // time to disconnect

@@ -25,7 +25,7 @@ namespace NDS_Networking_Project
         public List<ClientSocket> clientSockets = new List<ClientSocket>();
 
         //Helper creator function
-        public static TCPChatServer CreateInstance(int port, TextBox chatTextBox, PictureBox logo)
+        public static TCPChatServer CreateInstance(int port, TextBox chatTextBox, PictureBox logo, TextBox usernameTextBox)
         {
             TCPChatServer tcp = null; // set to null, if it returns null, user did something wrong
 
@@ -37,6 +37,7 @@ namespace NDS_Networking_Project
                 tcp.port = port;
                 tcp.chatTextBox = chatTextBox;
                 tcp.logoPicBox = logo;
+                tcp.clientUsernameTextBox = usernameTextBox;
             }
 
             //retunr as null OR built server
@@ -113,8 +114,6 @@ namespace NDS_Networking_Project
         {
             // get ClientSocket object from 'IAsyncResult AR' so we can deal with individual client data
             ClientSocket currentClientSocket = (ClientSocket)AR.AsyncState; // cast 'AR.AsyncState' as '(ClientSocket)' to access
-            
-            //TCPChatClient currentClient = (TCPChatClient)currentClientSocket;//TODO will this work? NOPE
 
             // how many bytes of data received
             int received;
@@ -140,21 +139,32 @@ namespace NDS_Networking_Project
 
             AddToChat(text);
 
-            string tempUserName = "";
-            if (text.Contains("!username "))
+            //Check for Username specific commands from clients and adjust data accordingly
+            string setupUserName = "";
+            string changeNameUserName = "";
+            if (text.Contains("!username ")) // setting name
             {
                 // create string to hold the username data
-                tempUserName = text.Remove(0, 10);
+                setupUserName = text.Remove(0, 10);
 
                 //append text so it triggers command
-                
                 text = text.Remove(9, text.Length - 9);
+            }
+            else if (text.Contains("!user ")) // changing name
+            {
+                changeNameUserName = text.Remove(0, 6);
+                text = text.Remove(5, text.Length - 5);
             }
 
             //TODO Check for commands from Users first
-            if(text.ToLower() == "!commands")
+            if (text.ToLower() == "!commands")
             {
-                byte[] data = Encoding.ASCII.GetBytes(nl + "COMMANDS ARE;" + nl + "!commands" + nl + "!about" + nl + "!who" + nl + "!whisper" + nl + "!exit");
+                byte[] data = Encoding.ASCII.GetBytes(nl + "COMMANDS ARE;" +
+                                                      nl + "!commands" + //TODO add descriptions heree.....
+                                                      nl + "!about" +
+                                                      nl + "!who" +
+                                                      nl + "!whisper" +
+                                                      nl + "!exit");
                 currentClientSocket.socket.Send(data); // send straight back to person who sent in data
                 AddToChat("\n...commands sent to client...");//TODO CHANGE THIS
             }
@@ -164,7 +174,38 @@ namespace NDS_Networking_Project
             }
             else if (text.ToLower() == "!who")
             {
-                //TODO fill ME in...
+                //TODO When server receives this message, it sends back messages containing the names of the
+                //TODO connected users to the client to be output to the chat window
+
+                //create byte array to store names
+                byte[] data = Encoding.ASCII.GetBytes(nl + "-- Connected Users --");
+                currentClientSocket.socket.Send(data);
+
+                string names = "";
+
+                // run through connected users, add to string seperated by empty space.
+                for (int i = 0; i < clientSockets.Count; ++i)
+                {
+                    names += " " + clientSockets[i].clientUserName;
+                }
+
+                //append string, store seperate names in an array
+                string[] allNames = names.Split(' ');
+
+                //loop through array and send their data to client window!
+                for (int i = 0; i < allNames.Length; ++i)
+                {
+                    string temp = allNames[i];
+                    if (temp == "")
+                    {
+                        //SKIP
+                    }
+                    else
+                    {
+                        data = Encoding.ASCII.GetBytes(nl + "User: " + temp);
+                        currentClientSocket.socket.Send(data);
+                    }
+                }
             }
             else if (text.ToLower() == "!whisper")
             {
@@ -190,10 +231,10 @@ namespace NDS_Networking_Project
                 for (int i = 0; i < clientSockets.Count; ++i)
                 {
                     // if the name is taken
-                    if(clientSockets[i].clientUserName == tempUserName)
+                    if (clientSockets[i].clientUserName == setupUserName)
                     {
                         //TODO  - tell them it's been taken
-                        data = Encoding.ASCII.GetBytes(nl + "!!! Username: " + tempUserName + " is already taken !!!" + 
+                        data = Encoding.ASCII.GetBytes(nl + "!!! Username: " + setupUserName + " is already taken !!!" +
                                                        nl + "<< Disconnecting User >>");
                         currentClientSocket.socket.Send(data); // send it back
 
@@ -203,22 +244,22 @@ namespace NDS_Networking_Project
 
                     }
                     else if (clientSockets[i].clientUserName == null)
-                    { 
-                        currentClientSocket.clientUserName = tempUserName;
+                    {
+                        currentClientSocket.clientUserName = setupUserName;
 
                         // Send data to update display box for client Usernames
-                        data = Encoding.ASCII.GetBytes("!displayusername " + tempUserName);
+                        data = Encoding.ASCII.GetBytes("!displayusername " + setupUserName);
                         currentClientSocket.socket.Send(data);
 
                         // change data to represent success
                         data = Encoding.ASCII.GetBytes(nl + "<< Success >>" +
-                                                       nl + "Your New Username: " + tempUserName + nl + 
-                                                       nl + "Welcome to chat " + "'" + tempUserName + "'");
+                                                       nl + "Your New Username: " + setupUserName + nl +
+                                                       nl + "Welcome to chat " + "'" + setupUserName + "'");
                     }
                 }
 
                 // Notify
-                if(getKicked)
+                if (getKicked)
                 {
                     data = Encoding.ASCII.GetBytes("!kick"); // command for client to get disconnect 
                     currentClientSocket.socket.Send(data); // send it back
@@ -232,10 +273,31 @@ namespace NDS_Networking_Project
                 }
 
             }
+            else if (text.ToLower() == "!user")
+            {
+                byte[] data = Encoding.ASCII.GetBytes(" "); // create empty byte array
+
+                // change username!
+                string temp = currentClientSocket.clientUserName;
+                currentClientSocket.clientUserName = changeNameUserName;
+
+                // Send data to update display box for client Usernames
+                data = Encoding.ASCII.GetBytes("!displayusername " + changeNameUserName);
+                currentClientSocket.socket.Send(data);
+
+                //Notify others of thy success
+                SendToAll(nl + "..." + temp + " has transformed..." + nl +
+                          "They shall now be know as: '" + currentClientSocket.clientUserName + "'" + nl,
+                          currentClientSocket);
+
+            }
             else if (text.ToLower() == "!exit") // client wants to exit gracefully...
             {
                 byte[] data = Encoding.ASCII.GetBytes("!exit");
                 currentClientSocket.socket.Send(data); // send back data to change IDENT
+
+                // notify all they're leaving!
+                SendToAll(nl + "<< " + currentClientSocket.clientUserName + " has left the chat >>", currentClientSocket);
 
                 currentClientSocket.socket.Shutdown(SocketShutdown.Both); // shutdown server-side for client
                 currentClientSocket.socket.Close();
@@ -251,8 +313,7 @@ namespace NDS_Networking_Project
             }
             else // no cammond, REGULAR CHAT MESSAGE
             {
-                // must be normal chat message form client, so send to all other clients
-                SendToAll(currentClientSocket.clientUserName + ": " + text, currentClientSocket); // does not send to self though...
+                    SendToAll(currentClientSocket.clientUserName + ": " + text, currentClientSocket); //TODO does not send to self though...?
             }
 
             // now data has been received from this client, the thread is finished...

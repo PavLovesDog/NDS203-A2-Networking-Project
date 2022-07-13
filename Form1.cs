@@ -44,7 +44,7 @@ namespace NDS_Networking_Project
                     // pass in text(as string) from host port text box to try convert to INT
                     int port = int.Parse(HostPortTextBox.Text);
                     // Below Builds server with REFERENCES to chat box and logo pic for access
-                    server = TCPChatServer.CreateInstance(port, ChatTextBox, LogoPicBox); //try build a TCPChatServer object
+                    server = TCPChatServer.CreateInstance(port, ChatTextBox, LogoPicBox, ClientUsernameTextBox); //try build a TCPChatServer object
                     if(server == null)
                     {
                         // ERRORS!
