@@ -24,6 +24,11 @@ namespace NDS_Networking_Project
         // Connected clients
         public List<ClientSocket> clientSockets = new List<ClientSocket>();
 
+        // name of private message receiver... duh
+        public string privateMsgReceiver = "";
+        public string privateMsgSender = "";
+        public bool privateMessage = false;
+
         //Helper creator function
         public static TCPChatServer CreateInstance(int port, TextBox chatTextBox, PictureBox logo, TextBox usernameTextBox)
         {
@@ -137,11 +142,12 @@ namespace NDS_Networking_Project
             //convert received byte data into string
             string text = Encoding.ASCII.GetString(recBuf);
 
-            AddToChat(text);
+            AddToChat(text); //TODO this paints er'rything on the server window
 
             //Check for Username specific commands from clients and adjust data accordingly
             string setupUserName = "";
             string changeNameUserName = "";
+            
             if (text.Contains("!username ")) // setting name
             {
                 // create string to hold the username data
@@ -155,8 +161,13 @@ namespace NDS_Networking_Project
                 changeNameUserName = text.Remove(0, 6);
                 text = text.Remove(5, text.Length - 5);
             }
+            else if (text.Contains("!whisper ")) // private messaging
+            {
+                privateMsgReceiver = text.Substring(9); // isolate username
+                privateMsgSender = currentClientSocket.clientUserName;
+                text = text.Remove(8, text.Length - 8); // re-create command string
+            }
 
-            //TODO Check for commands from Users first
             if (text.ToLower() == "!commands")
             {
                 byte[] data = Encoding.ASCII.GetBytes(nl + "<< COMMANDS >>" +
@@ -224,7 +235,30 @@ namespace NDS_Networking_Project
             }
             else if (text.ToLower() == "!whisper")
             {
-                //TODO fill me IN...
+                //loop through clients, match their username
+                bool isFound = false;
+                for(int i =0; i < clientSockets.Count; ++i)
+                {
+                    if(clientSockets[i].clientUserName == privateMsgReceiver)
+                    {
+                        isFound = true;
+                    }
+                }
+
+                if(isFound)
+                {
+                    byte[] data = Encoding.ASCII.GetBytes(nl + "< Next message will only be sent to " + privateMsgReceiver + " >" +
+                                                          nl + "Type your message: ");
+                    currentClientSocket.socket.Send(data);
+                    privateMessage = true;
+                }
+                else // no client exists
+                {
+                    byte[] data = Encoding.ASCII.GetBytes(nl + "< User " + privateMsgReceiver + " does not exist >");
+                    currentClientSocket.socket.Send(data);
+                    privateMsgReceiver = ""; // clear string
+                }
+
             }
             else if (text.ToLower() == "!username") // concatonate or whatever the first half.
             {
@@ -326,9 +360,33 @@ namespace NDS_Networking_Project
 
                 return; // bail early, rest of function not useful for !exit
             }
-            else // no cammond, REGULAR CHAT MESSAGE
+            else // no command, REGULAR CHAT MESSAGE
             {
+                //check for private messages going out && if it was the original !whisper caller
+                if(privateMessage &&
+                   privateMsgSender == currentClientSocket.clientUserName)
+                {
+                    byte[] data = Encoding.ASCII.GetBytes("<Private Message> " + currentClientSocket.clientUserName + ": " + text);
+
+                    //loop through clients, match their username
+                    for(int i = 0; i < clientSockets.Count; ++i)
+                    {
+                        if (clientSockets[i].clientUserName == privateMsgReceiver)
+                        {
+                            clientSockets[i].socket.Send(data); // send data to specific client
+                        }
+                    }
+
+                    // reset bool and clear msg receiver/sender string for another whisper moment
+                    privateMessage = false;
+                    privateMsgReceiver = "";
+                    privateMsgSender = "";
+                }
+                else // regular ole message
+                {
                     SendToAll(currentClientSocket.clientUserName + ": " + text, currentClientSocket); //TODO does not send to self though...?
+                }
+
             }
 
             // now data has been received from this client, the thread is finished...
