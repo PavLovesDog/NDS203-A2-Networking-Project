@@ -66,9 +66,9 @@ namespace NDS_Networking_Project
             //AddToChat("<< Connected >>");
             AddToChat(nl + "<< Connected >>" + nl + "...ready to receive data..." +
                       nl + nl + "< Please enter your username using the '!username' command >" +
-                      nl + "e.g !username [new_username_here]" +
-                      nl + " OR " +
-                      nl + " < type !commands to see all available commands >");
+                      nl + "  e.g !username [new_username_here]" +
+                      nl + "                                  - OR - " +
+                      nl + "< Type !commands to see all available commands >");
 
             //start thread for receeiving data from the server
             clientSocket.socket.BeginReceive(clientSocket.buffer, 

@@ -27,7 +27,8 @@ namespace NDS_Networking_Project
         // name of private message receiver... duh
         public string privateMsgReceiver = "";
         public string privateMsgSender = "";
-        public bool privateMessage = false;
+        public string privateMessage = "";
+        public bool isPrivateMessage = false;
 
         //Helper creator function
         public static TCPChatServer CreateInstance(int port, TextBox chatTextBox, PictureBox logo, TextBox usernameTextBox)
@@ -147,6 +148,7 @@ namespace NDS_Networking_Project
             //Check for Username specific commands from clients and adjust data accordingly
             string setupUserName = "";
             string changeNameUserName = "";
+            string magicQuestion = "";
             
             if (text.Contains("!username ")) // setting name
             {
@@ -163,22 +165,40 @@ namespace NDS_Networking_Project
             }
             else if (text.Contains("!whisper ")) // private messaging
             {
-                privateMsgReceiver = text.Substring(9); // isolate username
-                privateMsgSender = currentClientSocket.clientUserName;
-                text = text.Remove(8, text.Length - 8); // re-create command string
+                string[] subStrings = text.Split(' ');
+                privateMsgReceiver = subStrings[1];
+
+                int messageIndex = (9 + privateMsgReceiver.Length);
+                privateMessage = text.Substring(messageIndex, (text.Length - messageIndex));
+
+                text = subStrings[0]; // revert text to command only
+
+                //TODO WORKS!
+                //privateMsgReceiver = text.Substring(9); // isolate username
+                //privateMsgSender = currentClientSocket.clientUserName;
+                //text = text.Remove(8, text.Length - 8); // re-create command string
+            }
+            else if(text.Contains("!magic "))
+            {
+                string[] subStrings = text.Split(' '); // split
+
+                int messageIndex = (7 + privateMsgReceiver.Length);
+                magicQuestion = text.Substring(messageIndex, (text.Length - messageIndex));
+
+                text = subStrings[0]; // revert text to command only
             }
 
             if (text.ToLower() == "!commands")
             {
                 byte[] data = Encoding.ASCII.GetBytes(nl + "<< COMMANDS >>" +
-                                                      nl + "!commands - see a list of commands" +
-                                                      nl + "!username [new_username] - set yourself a new username" +
-                                                      nl + "!user - change your current username" +
-                                                      nl + "!about - see details of the program" +
-                                                      nl + "!who - see who is in the chat" +
-                                                      nl + "!whisper [username] - send a private message to user" +
-                                                      nl + "!joke - get the server to tell you a random joke" +
-                                                      nl + "!exit - disconnect from the server");
+                                                      nl + "!commands   --> see a list of commands" +
+                                                      nl + "!username [new_username]   --> set yourself a new username" +
+                                                      nl + "!user   --> change your current username" +
+                                                      nl + "!about   --> see details of the program" +
+                                                      nl + "!who   --> see who is in the chat" +
+                                                      nl + "!whisper [username]   --> select user for private message" +
+                                                      nl + "!magic [question]   --> ask the Magic-8-Ball a question, reap its wisdom" +
+                                                      nl + "!exit   --> disconnect from the server");
                 currentClientSocket.socket.Send(data); // send straight back to person who sent in data
                 AddToChat("\n...commands sent to client...");//TODO CHANGE THIS ?
             }
@@ -232,32 +252,58 @@ namespace NDS_Networking_Project
                         currentClientSocket.socket.Send(data);
                     }
                 }
+
+                if (allNames[0] == "" && allNames[1] == "") // you're all alone here..
+                {
+                    data = Encoding.ASCII.GetBytes(nl + "...it's just you here..." +
+                                                   nl + " *tumbleweed blows by*");
+                    currentClientSocket.socket.Send(data);
+                }
             }
             else if (text.ToLower() == "!whisper")
             {
-                //loop through clients, match their username
-                bool isFound = false;
-                for(int i =0; i < clientSockets.Count; ++i)
+                //int messageIndex = (9 + privateMsgReceiver.Length);
+                //string sub = text.Substring(messageIndex, text.Length - messageIndex);
+
+
+                byte[] data = Encoding.ASCII.GetBytes(nl + "<Private Message> " + currentClientSocket.clientUserName +
+                                                      ":" + privateMessage);
+
+                for (int i = 0; i < clientSockets.Count; ++i)
                 {
-                    if(clientSockets[i].clientUserName == privateMsgReceiver)
+                    if (clientSockets[i].clientUserName == privateMsgReceiver)
                     {
-                        isFound = true;
+                        clientSockets[i].socket.Send(data); // send to the reciever!
                     }
                 }
 
-                if(isFound)
-                {
-                    byte[] data = Encoding.ASCII.GetBytes(nl + "< Next message will only be sent to " + privateMsgReceiver + " >" +
-                                                          nl + "Type your message: ");
-                    currentClientSocket.socket.Send(data);
-                    privateMessage = true;
-                }
-                else // no client exists
-                {
-                    byte[] data = Encoding.ASCII.GetBytes(nl + "< User " + privateMsgReceiver + " does not exist >");
-                    currentClientSocket.socket.Send(data);
-                    privateMsgReceiver = ""; // clear string
-                }
+                //reset strings for other !whisper
+                privateMsgReceiver = "";
+                privateMessage = "";
+
+                ////loop through clients, match their username
+                //bool isFound = false;
+                //for(int i =0; i < clientSockets.Count; ++i)
+                //{
+                //    if(clientSockets[i].clientUserName == privateMsgReceiver)
+                //    {
+                //        isFound = true;
+                //    }
+                //}
+                //
+                //if(isFound)
+                //{
+                //    byte[] data = Encoding.ASCII.GetBytes(nl + "< Next message will only be sent to " + privateMsgReceiver + " >" +
+                //                                          nl + "Type your message: ");
+                //    currentClientSocket.socket.Send(data);
+                //    isPrivateMessage = true;
+                //}
+                //else // no client exists
+                //{
+                //    byte[] data = Encoding.ASCII.GetBytes(nl + "< User " + privateMsgReceiver + " does not exist >");
+                //    currentClientSocket.socket.Send(data);
+                //    privateMsgReceiver = ""; // clear string
+                //}
 
             }
             else if (text.ToLower() == "!username") // concatonate or whatever the first half.
@@ -318,7 +364,9 @@ namespace NDS_Networking_Project
                 }
                 else
                 {
+                    SendToAll(nl + "<< " + currentClientSocket.clientUserName + " has joined the chat >>", currentClientSocket);
                     currentClientSocket.socket.Send(data); // send it back
+                    // notify all you're here!
                 }
 
             }
@@ -326,19 +374,78 @@ namespace NDS_Networking_Project
             {
                 byte[] data = Encoding.ASCII.GetBytes(" "); // create empty byte array
 
-                // change username!
+                // try change username!
                 string temp = currentClientSocket.clientUserName;
-                currentClientSocket.clientUserName = changeNameUserName;
+                bool canChangeName = false;
 
-                // Send data to update display box for client Usernames
-                data = Encoding.ASCII.GetBytes("!displayusername " + changeNameUserName);
-                currentClientSocket.socket.Send(data);
+                // roll through list
+                for (int i = 0; i < clientSockets.Count; ++i)
+                {
+                    if (clientSockets[i].clientUserName != changeNameUserName)
+                    {
+                        //change name!
+                        canChangeName = true;
+                    }
+                    else
+                    {
+                        data = Encoding.ASCII.GetBytes(nl + "< Cannot Change Username >" +
+                                                        nl + "User: " + changeNameUserName + " already exists.");
+                        canChangeName = false;
+                        break;
+                    }
+                }
 
-                //Notify others of thy success
-                SendToAll(nl + "..." + temp + " has transformed..." + nl +
-                          "They shall now be know as: '" + currentClientSocket.clientUserName + "'" + nl,
-                          currentClientSocket);
+                if (canChangeName)
+                {
+                    currentClientSocket.clientUserName = changeNameUserName;
+                    // Send data to update display box for client Usernames
+                    data = Encoding.ASCII.GetBytes("!displayusername " + changeNameUserName);
+                    currentClientSocket.socket.Send(data);
 
+                    //Notify others of thy success
+                    SendToAll(nl + "..." + temp + " has transformed..." + nl +
+                              "They shall now be know as: '" + currentClientSocket.clientUserName + "'" + nl,
+                              currentClientSocket);
+                }
+                else
+                {
+                    currentClientSocket.socket.Send(data); // send denial data
+                }
+
+
+            }
+            else if (text.ToLower() == "!magic")
+            {
+                string[] phrases = { "It is certain.", "It is decidedly so.", "Without a doubt.", "Yes, definitely.", "You may rely on it.",
+                                     "As I see it, yes.", "Most likely.", "Outlook looks good.", "Yes.", "Signs point to yes.",
+                                     "Reply hazy, try again.", "Ask again later.", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.",
+                                     "Don't count on it.", "My reply is no.", "My sources say no.", "Outlook looks bleak.", "Very doubtful.",};
+                
+                // choose a phrase at random,
+                Random rnd = new Random();
+                int index = rnd.Next(0, 19);
+
+                //send the question and answer back to client who asked question (Maybe to all??)
+                byte[] data = Encoding.ASCII.GetBytes(nl + "Your Question --->" + magicQuestion + 
+                                                      nl + "My Divine Answer --->" + phrases[index]);
+                //concoct message based on answer
+                string messageToAll = "";
+                if(index >= 0 && index <= 9) // positive message
+                {
+                    messageToAll = nl + currentClientSocket.clientUserName + " has asked the Magic 8 Ball a question!" + nl + "...things are in their favour...";
+                }
+                else if(index >= 10 && index <= 14) // uncertain message
+                {
+                    messageToAll = nl + currentClientSocket.clientUserName + " has asked the Magic 8 Ball a question!" + nl + "...things are questionable...";
+                }
+                else if(index >= 15 && index <= 19) // Negative message
+                {
+                    messageToAll = nl + currentClientSocket.clientUserName + " has asked the Magic 8 Ball a question!" + nl + "...misfortune befalls them...";
+                }
+
+                
+                SendToAll(messageToAll, currentClientSocket); //Let the chat know of the askers fortunes
+                currentClientSocket.socket.Send(data); // reply to client
             }
             else if (text.ToLower() == "!exit") // client wants to exit gracefully...
             {
@@ -362,27 +469,27 @@ namespace NDS_Networking_Project
             }
             else // no command, REGULAR CHAT MESSAGE
             {
-                //check for private messages going out && if it was the original !whisper caller
-                if(privateMessage &&
-                   privateMsgSender == currentClientSocket.clientUserName)
-                {
-                    byte[] data = Encoding.ASCII.GetBytes("<Private Message> " + currentClientSocket.clientUserName + ": " + text);
-
-                    //loop through clients, match their username
-                    for(int i = 0; i < clientSockets.Count; ++i)
-                    {
-                        if (clientSockets[i].clientUserName == privateMsgReceiver)
-                        {
-                            clientSockets[i].socket.Send(data); // send data to specific client
-                        }
-                    }
-
-                    // reset bool and clear msg receiver/sender string for another whisper moment
-                    privateMessage = false;
-                    privateMsgReceiver = "";
-                    privateMsgSender = "";
-                }
-                else // regular ole message
+                ////check for private messages going out && if it was the original !whisper caller
+                //if(isPrivateMessage &&
+                //   privateMsgSender == currentClientSocket.clientUserName)
+                //{
+                //    byte[] data = Encoding.ASCII.GetBytes("<Private Message> " + currentClientSocket.clientUserName + ": " + text);
+                //
+                //    //loop through clients, match their username
+                //    for(int i = 0; i < clientSockets.Count; ++i)
+                //    {
+                //        if (clientSockets[i].clientUserName == privateMsgReceiver)
+                //        {
+                //            clientSockets[i].socket.Send(data); // send data to specific client
+                //        }
+                //    }
+                //
+                //    // reset bool and clear msg receiver/sender string for another whisper moment
+                //    isPrivateMessage = false;
+                //    privateMsgReceiver = "";
+                //    privateMsgSender = "";
+                //}
+                //else // regular ole message
                 {
                     SendToAll(currentClientSocket.clientUserName + ": " + text, currentClientSocket); //TODO does not send to self though...?
                 }
