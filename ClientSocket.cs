@@ -10,7 +10,7 @@ namespace NDS_Networking_Project
     {
         //TODO add username & other client specific data
         public string clientUserName;
-        public int clientID;
+        public bool isModerator;
 
         public Socket socket; //port and IP address
         public const int BUFFER_SIZE = 2048;

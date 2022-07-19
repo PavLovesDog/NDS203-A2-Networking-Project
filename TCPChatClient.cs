@@ -150,9 +150,7 @@ namespace NDS_Networking_Project
                     clientUsernameTextBox.Text = tempUserName;
                 });
             }
-
-            
-
+            // -------------------------------------------------------- Reaction Commands
 
 
             //any data at this point from server is likely chat message, so put in text box.

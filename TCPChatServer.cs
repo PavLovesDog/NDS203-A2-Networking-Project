@@ -143,13 +143,15 @@ namespace NDS_Networking_Project
             //convert received byte data into string
             string text = Encoding.ASCII.GetString(recBuf);
 
-            AddToChat(text); //TODO this paints er'rything on the server window
+            AddToChat(text); //TODO this paints er'rything on the server window, Change it??
 
-            //Check for Username specific commands from clients and adjust data accordingly
+            // Strings for command specific data control
             string setupUserName = "";
             string changeNameUserName = "";
             string magicQuestion = "";
+            string userToKick = "";
             
+            //Check for text specific commands from clients and adjust data accordingly below -----------
             if (text.Contains("!username ")) // setting name
             {
                 // create string to hold the username data
@@ -165,11 +167,12 @@ namespace NDS_Networking_Project
             }
             else if (text.Contains("!whisper ")) // private messaging
             {
+                // split up and grab necessary strings
                 string[] subStrings = text.Split(' ');
-                privateMsgReceiver = subStrings[1];
+                privateMsgReceiver = subStrings[1]; // name of client receiving message
 
-                int messageIndex = (9 + privateMsgReceiver.Length);
-                privateMessage = text.Substring(messageIndex, (text.Length - messageIndex));
+                int messageIndex = (9 + privateMsgReceiver.Length); // find index of start of message
+                privateMessage = text.Substring(messageIndex, (text.Length - messageIndex)); // store it
 
                 text = subStrings[0]; // revert text to command only
 
@@ -180,14 +183,21 @@ namespace NDS_Networking_Project
             }
             else if(text.Contains("!magic "))
             {
-                string[] subStrings = text.Split(' '); // split
+                string[] subStrings = text.Split(' ');
 
                 int messageIndex = (7 + privateMsgReceiver.Length);
-                magicQuestion = text.Substring(messageIndex, (text.Length - messageIndex));
+                magicQuestion = text.Substring(messageIndex, (text.Length - messageIndex)); // store question
 
                 text = subStrings[0]; // revert text to command only
             }
+            else if(text.Contains("!kick "))
+            {
+                string[] subStrings = text.Split(' ');
+                userToKick = subStrings[1]; // assign name
+                text = subStrings[0]; // concatonate string to trigger command
+            }
 
+            // Text specific command actions -------------------------------------------------------------
             if (text.ToLower() == "!commands")
             {
                 byte[] data = Encoding.ASCII.GetBytes(nl + "<< COMMANDS >>" +
@@ -198,6 +208,7 @@ namespace NDS_Networking_Project
                                                       nl + "!who   --> see who is in the chat" +
                                                       nl + "!whisper [username]   --> select user for private message" +
                                                       nl + "!magic [question]   --> ask the Magic-8-Ball a question, reap its wisdom" +
+                                                      nl + "<<MODERATORS ONLY>> !kick [username]   --> kick selected user from the chat" +
                                                       nl + "!exit   --> disconnect from the server");
                 currentClientSocket.socket.Send(data); // send straight back to person who sent in data
                 AddToChat("\n...commands sent to client...");//TODO CHANGE THIS ?
@@ -207,7 +218,7 @@ namespace NDS_Networking_Project
                 string IP = serverSocket.LocalEndPoint.ToString(); // LOCAL is the server host
 
                 //Append strings
-                string appendedPort = IP.Replace("0.0.0.0:", "");
+                string appendedPort = IP.Replace("0.0.0.0:", ""); // why is it 0.0.0.0???
                 string appendedIP = IP.Replace(":6666", "");
 
                 byte[] data = Encoding.ASCII.GetBytes(nl + "Created by Matthew Carr & Charles Bird" +
@@ -220,8 +231,8 @@ namespace NDS_Networking_Project
             }
             else if (text.ToLower() == "!who")
             {
-                //TODO When server receives this message, it sends back messages containing the names of the
-                //TODO connected users to the client to be output to the chat window
+                //When server receives this message, it sends back messages containing the names of the
+                //connected users to the client to be output to the chat window
 
                 //create byte array to store names
                 byte[] data = Encoding.ASCII.GetBytes(nl + "-- Connected Users --");
@@ -262,10 +273,6 @@ namespace NDS_Networking_Project
             }
             else if (text.ToLower() == "!whisper")
             {
-                //int messageIndex = (9 + privateMsgReceiver.Length);
-                //string sub = text.Substring(messageIndex, text.Length - messageIndex);
-
-
                 byte[] data = Encoding.ASCII.GetBytes(nl + "<Private Message> " + currentClientSocket.clientUserName +
                                                       ":" + privateMessage);
 
@@ -280,7 +287,7 @@ namespace NDS_Networking_Project
                 //reset strings for other !whisper
                 privateMsgReceiver = "";
                 privateMessage = "";
-
+                #region old shit
                 ////loop through clients, match their username
                 //bool isFound = false;
                 //for(int i =0; i < clientSockets.Count; ++i)
@@ -304,19 +311,14 @@ namespace NDS_Networking_Project
                 //    currentClientSocket.socket.Send(data);
                 //    privateMsgReceiver = ""; // clear string
                 //}
+                #endregion
 
             }
-            else if (text.ToLower() == "!username") // concatonate or whatever the first half.
+            else if (text.ToLower() == "!username")
             {
-                /*
-                    string IP = currentClientSocket.socket.LocalEndPoint.ToString(); // LOCAL is the server host
-                    string port = currentClientSocket.socket.RemoteEndPoint.ToString(); // REMOTE is the connected user
-
-                    //Append string to remove IPaddress "127.0.0.1:" from front to leave only port
-                    //port.Replace("127.0.0.1:", "");
-                    string appendedPort = port.Remove(0, 10); // remove IPAddress
-                    //port.Remove(0, 10); // remove IPAddress
-                */
+                //NOTE TO SELF
+                //string IP = currentClientSocket.socket.LocalEndPoint.ToString(); // LOCAL is the server host
+                //string port = currentClientSocket.socket.RemoteEndPoint.ToString(); // REMOTE is the connected user
 
                 byte[] data = Encoding.ASCII.GetBytes(" "); // create empty byte array
                 bool getKicked = false;
@@ -328,12 +330,12 @@ namespace NDS_Networking_Project
                     // if the name is taken
                     if (clientSockets[i].clientUserName == setupUserName)
                     {
-                        //TODO  - tell them it's been taken
+                        // tell them it's been taken
                         data = Encoding.ASCII.GetBytes(nl + "!!! Username: " + setupUserName + " is already taken !!!" +
                                                        nl + "<< Disconnecting User >>");
                         currentClientSocket.socket.Send(data); // send it back
 
-                        //TODO  - boot them
+                        // boot them
                         getKicked = true;
                         break;
 
@@ -411,8 +413,6 @@ namespace NDS_Networking_Project
                 {
                     currentClientSocket.socket.Send(data); // send denial data
                 }
-
-
             }
             else if (text.ToLower() == "!magic")
             {
@@ -443,9 +443,48 @@ namespace NDS_Networking_Project
                     messageToAll = nl + currentClientSocket.clientUserName + " has asked the Magic 8 Ball a question!" + nl + "...misfortune befalls them...";
                 }
 
-                
                 SendToAll(messageToAll, currentClientSocket); //Let the chat know of the askers fortunes
                 currentClientSocket.socket.Send(data); // reply to client
+            }
+            else if (text.ToLower() == "!kick")
+            {
+                // steps 1, 3, 4 are done on the form1.cs
+                ////1 The server can designate a moderator with !mod [username] e.g. !mod Bob. 
+                //2 Moderators can kick other clients using !kick [username]. ??? EXCEPTION THROWN
+                ////3 If the server uses the !mod command on a moderator, then they are demoted back to normal client. 
+                ////4 Server can also use !mods command to see a list of moderators output to the chat window.
+                //
+                if(currentClientSocket.isModerator == true) // client is moderater and able to kick others!
+                {
+                    try
+                    {
+                        byte[] data = Encoding.ASCII.GetBytes("!exit");
+                        for (int i = 0; i < clientSockets.Count; ++i)
+                        {
+                            if (userToKick == clientSockets[i].clientUserName)
+                            {
+                                // notify all client was kicked!
+                                clientSockets[i].socket.Send(data); // send data to change IDENT of kicked user
+                                SendToAll(nl + "<< " + userToKick + " was kicked from the chat by Moderator " + currentClientSocket.clientUserName + " >>", currentClientSocket);
+                                AddToChat("<< Client " + userToKick + " Disconnected by " + currentClientSocket.clientUserName + " >>");
+
+                                clientSockets[i].socket.Shutdown(SocketShutdown.Both); // shutdown server-side for client
+                                clientSockets[i].socket.Close();
+                                clientSockets.Remove(clientSockets[i]);
+                                break; // as now the clientSockets.count has been adjusted
+                            }
+                        }
+                    }
+                    catch (ObjectDisposedException er)
+                    {
+                        AddToChat(nl+ "Error: " + er.Message + nl + nl);
+                    }
+                }
+                else // No go, Pablo
+                {
+                    byte[] data = Encoding.ASCII.GetBytes(nl + "< You do NOT have Moderator privileges >");
+                    currentClientSocket.socket.Send(data);
+                }
             }
             else if (text.ToLower() == "!exit") // client wants to exit gracefully...
             {
@@ -469,31 +508,8 @@ namespace NDS_Networking_Project
             }
             else // no command, REGULAR CHAT MESSAGE
             {
-                ////check for private messages going out && if it was the original !whisper caller
-                //if(isPrivateMessage &&
-                //   privateMsgSender == currentClientSocket.clientUserName)
-                //{
-                //    byte[] data = Encoding.ASCII.GetBytes("<Private Message> " + currentClientSocket.clientUserName + ": " + text);
-                //
-                //    //loop through clients, match their username
-                //    for(int i = 0; i < clientSockets.Count; ++i)
-                //    {
-                //        if (clientSockets[i].clientUserName == privateMsgReceiver)
-                //        {
-                //            clientSockets[i].socket.Send(data); // send data to specific client
-                //        }
-                //    }
-                //
-                //    // reset bool and clear msg receiver/sender string for another whisper moment
-                //    isPrivateMessage = false;
-                //    privateMsgReceiver = "";
-                //    privateMsgSender = "";
-                //}
-                //else // regular ole message
-                {
-                    SendToAll(currentClientSocket.clientUserName + ": " + text, currentClientSocket); //TODO does not send to self though...?
-                }
-
+                SendToAll(currentClientSocket.clientUserName + ": " + text, currentClientSocket);
+                //TODO also send to self?? i.e AddToChat()
             }
 
             // now data has been received from this client, the thread is finished...

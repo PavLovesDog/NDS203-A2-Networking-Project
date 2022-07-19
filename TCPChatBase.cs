@@ -15,6 +15,7 @@ namespace NDS_Networking_Project
         public TextBox chatTextBox; // to access main chat text box in app
         public int port; //when listenning for data, need port open
 
+        // Function to control borderstyle of icon
         public void IndentIcon()
         {
             //logoPicBox = NDS_Networking_Project.TCPChatClient.
