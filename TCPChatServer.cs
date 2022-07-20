@@ -128,7 +128,7 @@ namespace NDS_Networking_Project
             {
                 received = currentClientSocket.socket.EndReceive(AR); // find byte size
             }
-            catch(SocketException ex)
+            catch(Exception ex)
             {
                 AddToChat("Error: " + ex.Message + nl + nl);
                 AddToChat("! Error Occured !" + nl + "<< Client Disconnected >>");
@@ -206,9 +206,9 @@ namespace NDS_Networking_Project
                                                       nl + "!user   --> change your current username" +
                                                       nl + "!about   --> see details of the program" +
                                                       nl + "!who   --> see who is in the chat" +
-                                                      nl + "!whisper [username]   --> select user for private message" +
+                                                      nl + "!whisper [username] [message]   --> select user for private message" +
                                                       nl + "!magic [question]   --> ask the Magic-8-Ball a question, reap its wisdom" +
-                                                      nl + "<<MODERATORS ONLY>> !kick [username]   --> kick selected user from the chat" +
+                                                      nl + "!kick [username]   --> kick selected user from the chat <<MODERATORS ONLY>>" +
                                                       nl + "!exit   --> disconnect from the server");
                 currentClientSocket.socket.Send(data); // send straight back to person who sent in data
                 AddToChat("\n...commands sent to client...");//TODO CHANGE THIS ?
