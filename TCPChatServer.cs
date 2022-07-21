@@ -171,6 +171,13 @@ namespace NDS_Networking_Project
                 string[] subStrings = text.Split(' ');
                 privateMsgReceiver = subStrings[1]; // name of client receiving message
 
+                //loop through users to check for double names
+                for (int i = 0; i < clientSockets.Count; ++i)
+                {
+                    if (subStrings[1] + " " + subStrings[2] == clientSockets[i].clientUserName)
+                        privateMsgReceiver = subStrings[1] + " " + subStrings[2];
+                }
+
                 int messageIndex = (9 + privateMsgReceiver.Length); // find index of start of message
                 privateMessage = text.Substring(messageIndex, (text.Length - messageIndex)); // store it
 
