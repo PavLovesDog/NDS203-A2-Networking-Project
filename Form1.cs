@@ -14,18 +14,6 @@ namespace NDS_Networking_Project
     {
         TCPChatServer server = null;
         TCPChatClient client = null;
-        public string clientUserName = null;
-        public int clientID = 1;
-
-        //public struct connectectedClient
-        //{
-        //    public string port;
-        //    public int clientID;
-        //    public string username;
-        //}
-        //public List<connectectedClient> connectectedClients = new List<connectectedClient>();
-
-
 
         public Form1()
         {
@@ -34,9 +22,6 @@ namespace NDS_Networking_Project
 
         private void HostServerButton_Click(object sender, EventArgs e)
         {
-            //HostPortTextBox.Text = "You Clicked Good!";
-            //string pef = HostPortTextBox.Text;
-
             if(CanHostOrJoin())
             {
                 try
@@ -76,7 +61,6 @@ namespace NDS_Networking_Project
                     int port = int.Parse(HostPortTextBox.Text);
                     int serverPort = int.Parse(ServerPortTextBox.Text);
 
-
                     // assigne details to the client connecting
                     client = TCPChatClient.CreateInstance(port, 
                                                           serverPort, 
@@ -84,7 +68,6 @@ namespace NDS_Networking_Project
                                                           ChatTextBox,
                                                           LogoPicBox,
                                                           ClientUsernameTextBox);
-
                     if(client == null)
                     {
                         //assume port issue
@@ -95,17 +78,11 @@ namespace NDS_Networking_Project
 
                     // Indent Icon for connectivity
                     LogoPicBox.BorderStyle = BorderStyle.Fixed3D;
-
-
-                   // clientID += 1; // increment for next user to  join
                 }
                 catch(Exception ex)
                 {
                     ChatTextBox.Text += "\nError: " + ex + "\n";
                 }
-
-                
-
             }
         }
 
@@ -128,10 +105,14 @@ namespace NDS_Networking_Project
                     bool clientFound = false;
                     bool clientDemoted = false;
 
+                    // check clients for double names
+                    if(sub.Length == 3)
+                    clientToMod = sub[1] + " " + sub[2];
+
                     // check name against connected clients
                     for(int i = 0; i < server.clientSockets.Count; ++i)
-                    {
-                        //TODO check if user is ALREADY a mod! if they are, demote them
+                    {   
+                        //DEMOTING
                         if(clientToMod == server.clientSockets[i].clientUserName &&    // if user exists
                                           server.clientSockets[i].isModerator == true) // if they're already a mod
                         {
@@ -139,12 +120,12 @@ namespace NDS_Networking_Project
                             clientDemoted = true;
                             break; // leave loop, demoting is done
                         }
+                        //PROMOTING
                         else if(clientToMod == server.clientSockets[i].clientUserName) // if user exists
                         {
                             // make that server a moderator
                             server.clientSockets[i].isModerator = true;
                             clientFound = true;
-                            //break; // leave loop so client isn't immediaely demoted?
                         }
                     }
 
@@ -170,7 +151,7 @@ namespace NDS_Networking_Project
                 else if(TypeTextBox.Text.Contains("!mods")) // ----------------------------- end !mod, start !mods command
                 {
                     //create title for readability
-                    server.AddToChat("\n\n" + "-- Moderators --");
+                    server.AddToChat("\n\n" + "----- Moderators -----");
 
                     string names = "";
 
@@ -195,7 +176,36 @@ namespace NDS_Networking_Project
                         }
                         else
                         {
-                            server.AddToChat("\n" + "User: " + temp);
+                            // BEGIN Double name check. 
+                            if(i <= allNames.Length - 2) // catch for out of bounds index
+                            {
+                                bool doubleName = false;
+
+                                // run through clients
+                                for (int j = 0; j < server.clientSockets.Count; ++j)
+                                {
+                                    // check if the next 2 names in a row match the client username, to avoid double name seperation
+                                    if (server.clientSockets[j].clientUserName == temp + " " + allNames[i + 1])
+                                    {
+                                        doubleName = true;
+                                        break;
+                                    }
+                                }
+
+                                if (doubleName)
+                                {
+                                    server.AddToChat("\n" + "User: " + temp + " " + allNames[i + 1]);
+                                    ++i; // increment i to skip next name because its a part of this one
+                                }
+                                else
+                                {
+                                    server.AddToChat("\n" + "User: " + temp);
+                                }
+                            }
+                            else
+                            {
+                                server.AddToChat("\n" + "User: " + temp);
+                            }
                         }
                     }
 
@@ -214,6 +224,17 @@ namespace NDS_Networking_Project
 
         public bool CanHostOrJoin()
         {
+            if(client != null) // check if client already exists
+            {
+                // if they do but their username is null, They are a reconnecting client. 
+                if(client.clientSocket.isConnected == true && client.clientSocket.clientUserName == null)
+                {
+                    // set null for reconnection
+                    client = null;
+                    server = null;
+                }
+            }
+
             if(server == null && client == null) //no server/client existt yet, can host/join
             {
                 return true;

@@ -38,11 +38,13 @@ namespace NDS_Networking_Project
                 tcp.clientSocket.socket = tcp.socket;
                 tcp.logoPicBox = logoPic;
                 tcp.clientUsernameTextBox = clientUsername;
-                
+                tcp.clientSocket.isConnected = true; // bool for connectivity
+                tcp.clientSocket.isModerator = false; // set to false on start up
             }
             return tcp;
         }
 
+        //Try connect to server, notify if successfull
         public void ConnectToServer()
         {
             //connection attempts per user
@@ -61,14 +63,23 @@ namespace NDS_Networking_Project
                 {
                     chatTextBox.Text += "\nError: " + ex.Message + "\n";
                 }
+
+                // break if continues to fail
+                if(attempts > 5)
+                {
+                    AddToChat(nl + "<<< Connection Failed >>>");
+                    return;
+                }
             }
 
             //AddToChat("<< Connected >>");
             AddToChat(nl + "<< Connected >>" + nl + "...ready to receive data..." +
-                      nl + nl + "< Please enter your username using the '!username' command >" +
+                      nl + nl + "-----------------------------------------------------------------------" +
+                      nl + "< Please enter your username using the '!username' command >" +
                       nl + "  e.g !username [new_username_here]" +
                       nl + "                                  - OR - " +
-                      nl + "< Type !commands to see all available commands >");
+                      nl + "< Type !commands to see all available commands >" +
+                      nl + "-----------------------------------------------------------");
 
             //start thread for receeiving data from the server
             clientSocket.socket.BeginReceive(clientSocket.buffer, 
@@ -118,44 +129,53 @@ namespace NDS_Networking_Project
             if(text.ToLower() == "!exit")
             {
                 // Reset icon Identation
-                logoPicBox.Invoke((Action)delegate // access the HOST logo.. how do I access cureent logo??
-                {
-                    if (logoPicBox.BorderStyle == BorderStyle.FixedSingle)
-                    {
-                        logoPicBox.BorderStyle = BorderStyle.Fixed3D;
-                    }
-                    else if (logoPicBox.BorderStyle == BorderStyle.Fixed3D)
-                    {
-                        logoPicBox.BorderStyle = BorderStyle.FixedSingle;
-                    }
-                });
+                IndentIcon();
 
                 //Empty Username box
                 clientUsernameTextBox.Invoke((Action)delegate
                 {
                     clientUsernameTextBox.Text = "";
                 });
+
+                // clear chat window
+                chatTextBox.Invoke((Action)delegate
+                {
+                    chatTextBox.Text = "<< Disconnected From Server >>";
+                });
+
+                // nullify username and other objects for re-connection parameters
+                currentClientSocket.clientUserName = null;
+                //currentClientSocket.isModerator = false;
+                clientUsernameTextBox = null;
+                chatTextBox = null;
+                logoPicBox = null;
+                return; // leave function as calling further will cause crashes
             }
-            else if(text.ToLower() == "!kick") // time to disconnect
+            else if(text.ToLower() == "!forcedkick") // chose a username that already exists, getting kicked
             {
+                // tell 'em what happened
+                chatTextBox.Invoke((Action)delegate
+                {
+                    chatTextBox.Text = "...disconnecting from server, username taken...";
+                });
+
                 currentClientSocket.socket.Shutdown(SocketShutdown.Both); // shutdown server-side for client
                 currentClientSocket.socket.Close();
-                AddToChat("<< Client Disconnected >>");
+                AddToChat(nl + "<< Client Disconnected >>");
+                return;
             }
-
-            if (text.ToLower() == "!displayusername")
+            else if (text.ToLower() == "!displayusername")
             {
                 clientUsernameTextBox.Invoke((Action)delegate
                 {
                     clientUsernameTextBox.Text = tempUserName;
                 });
             }
+            else // regular chat message!
+            {
+                AddToChat(text);
+            }
             // -------------------------------------------------------- Reaction Commands
-
-
-            //any data at this point from server is likely chat message, so put in text box.
-            //TODO NOTE Assignment 2 will also send OTHER types of data, so don't auto dump to chat right away
-            AddToChat(text); // change this for A2...
 
             //start thread for receeiving data from the server
             currentClientSocket.socket.BeginReceive(currentClientSocket.buffer,

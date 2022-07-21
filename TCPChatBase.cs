@@ -18,8 +18,7 @@ namespace NDS_Networking_Project
         // Function to control borderstyle of icon
         public void IndentIcon()
         {
-            //logoPicBox = NDS_Networking_Project.TCPChatClient.
-            logoPicBox.Invoke((Action)delegate // access the HOST logo.. how do I access cureent logo??
+            logoPicBox.Invoke((Action)delegate
             {
                 if (logoPicBox.BorderStyle == BorderStyle.FixedSingle)
                 {
@@ -35,7 +34,7 @@ namespace NDS_Networking_Project
         // Functions to help work with the chat text box
         public void SetChat(string str)
         {
-            /* As chat text box is running in MAIN thread, we need to do the following so it is
+            /* NOTE As chat text box is running in MAIN thread, we need to do the following so it is
              * accessible from whatever thread this class is running on...
              * Invoke is to send out a message to the textbox which it will receive and act on */
 
@@ -49,6 +48,7 @@ namespace NDS_Networking_Project
             });
         }
 
+        // function to add a passed string to server chatbox
         public void AddToChat(string str)
         {
 
@@ -57,7 +57,6 @@ namespace NDS_Networking_Project
                 // add message to text box screen
                 chatTextBox.AppendText(str); 
                 chatTextBox.AppendText(Environment.NewLine);
-
             });
         }
     }

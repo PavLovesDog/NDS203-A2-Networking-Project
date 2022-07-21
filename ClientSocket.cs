@@ -8,9 +8,9 @@ namespace NDS_Networking_Project
     // Represents a client
     public class ClientSocket
     {
-        //TODO add username & other client specific data
         public string clientUserName;
         public bool isModerator;
+        public bool isConnected;
 
         public Socket socket; //port and IP address
         public const int BUFFER_SIZE = 2048;
